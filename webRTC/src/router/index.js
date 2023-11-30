@@ -14,6 +14,12 @@ let routes = [
     path: '/virtualbg',
     name: 'virtualbg',
     component: () => import("@/views/virtualbg"),
+  },
+  {
+    path: '/camera-basics',
+    name: 'camera-basics',
+    component: () => import("@/views/camera-basics"),
+
   }
 ]
 
