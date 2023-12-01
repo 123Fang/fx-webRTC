@@ -19,13 +19,18 @@ let routes = [
     path: '/camera-basics',
     name: 'camera-basics',
     component: () => import("@/views/camera-basics"),
+  },
+  {
+    path: '/one2one',
+    name: 'one2one',
+    component: () => import("@/views/one2one"),
 
   }
 ]
 
 
 const router = new Router({
-  mode: 'history', // 去掉url中的#
+  // mode: 'history', // 去掉url中的#
   scrollBehavior: () => ({ y: 0 }),
   routes: routes
 

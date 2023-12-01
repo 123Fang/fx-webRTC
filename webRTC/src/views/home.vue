@@ -25,6 +25,8 @@ export default {
       taskList: [
         { id: 1, title: "摄像头基本使用", description: "摄像头获取、多个摄像头切换", icon: "el-icon-video-camera", style: "background-image: linear-gradient(to top, #d9afd9 0%, #97d9e1 100%);", uriType: 'router', router: "/camera-basics" },
         { id: 2, title: "虚拟背景", description: "虚拟背景", icon: "el-icon-video-camera", style: "background-image: linear-gradient(to top, #f920ff 0%, #00dbde 100%);", uriType: 'router', router: "/virtualbg" },
+        {id:3,title:"一对一网络视频",description:"一对一网络视频",icon:"el-icon-video-camera",style:"background-image: linear-gradient(to top, #ff0844 0%, #ffb199 100%);",uriType:'router',router:"/one2one" },
+
       ]
 
 
