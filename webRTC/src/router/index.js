@@ -25,7 +25,13 @@ let routes = [
     name: 'one2one',
     component: () => import("@/views/one2one"),
 
-  }
+  },
+  {
+    path: '/many2many',
+    name: 'many2many',
+    component: () => import("@/views/many2many"),
+
+  },
 ]
 
 
