@@ -68,8 +68,6 @@ function initInnerLocalDevice() {
   }
   navigator.mediaDevices.getUserMedia(constraints)
     .then(function (stream) {
-
-
       stream.getTracks().forEach(trick => {
         // console.log(trick.getSettings())
         trick.stop()
@@ -106,6 +104,10 @@ function initInnerLocalDevice() {
     })
     .catch(handleError);
 }
+
+
+
+
 export default {
   name: 'my-virtualbg',
   data() {
@@ -209,7 +211,7 @@ export default {
       selfieSegmentation = new SFS.SelfieSegmentation({
         locateFile: (file) => {
           console.log(file);
-          return `http://localhost:8081/v/${file}`;// 你本地的ip+端口
+          return `http://localhost:5500/webRTC/public/v/${file}`;// 你本地的ip+端口
         }
       });
       selfieSegmentation.setOptions({
