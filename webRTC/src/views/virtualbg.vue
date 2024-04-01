@@ -15,8 +15,8 @@
                 :value="item.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="听筒">
-            <el-select v-model="formInline.audioOutId" placeholder="听筒">
+          <el-form-item label="扬声器">
+            <el-select v-model="formInline.audioOutId" placeholder="扬声器">
               <el-option v-for="(item, index) in localDevice.audioOut " :key="index" :label="item.label"
                 :value="item.id"></el-option>
             </el-select>
@@ -30,7 +30,7 @@
     <el-row style="width: 100%;">
       <div style="width: 100%;display: flex;flex-direction: row;align-items: center;justify-content: center;">
         <video id="localdemo01" autoplay controls muted></video>
-        <canvas id="output_canvas" class="output_canvas" width="500px" height="400px"></canvas>
+        <canvas id="output_canvas" class="output_canvas" width="620px" height="400px"></canvas>
       </div>
     </el-row>
   </div>
@@ -38,75 +38,13 @@
 
 <script>
 import * as SFS from "@mediapipe/selfie_segmentation";
+import {initInnerLocalDevice} from '../hooks/initInnerLocalDevice'
 
 
 var canvasElement;
 var canvasCtx;
 var image;
 var selfieSegmentation = null;
-function handleError(error) {
-  // alert("摄像头无法正常使用，请检查是否占用或缺失")
-  console.error('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
-}
-/**
- * @author suc
- * device list init
- */
-var localDevice = null;
-function initInnerLocalDevice() {
-  // const that = this
-  localDevice = {
-    audioIn: [],
-    videoIn: [],
-    audioOut: []
-
-  }
-  let constraints = { video: true, audio: true }
-  if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-    console.log("浏览器不支持获取媒体设备");
-    return;
-  }
-  navigator.mediaDevices.getUserMedia(constraints)
-    .then(function (stream) {
-      stream.getTracks().forEach(trick => {
-        // console.log(trick.getSettings())
-        trick.stop()
-      })
-
-      // List cameras and microphones.
-      navigator.mediaDevices.enumerateDevices()
-        .then(function (devices) {
-          devices.forEach(function (device) {
-            let obj = { id: device.deviceId, kind: device.kind, label: device.label }
-            if (device.kind === 'audioinput') {
-              if (localDevice.audioIn.filter(e => e.id === device.deviceId).length === 0) {
-                localDevice.audioIn.push(obj)
-              }
-            } if (device.kind === 'audiooutput') {
-              if (localDevice.audioOut.filter(e => e.id === device.deviceId).length === 0) {
-                localDevice.audioOut.push(obj)
-              }
-            } else if (device.kind === 'videoinput') {
-              if (localDevice.videoIn.filter(e => e.id === device.deviceId).length === 0) {
-                localDevice.videoIn.push(obj)
-              }
-            }
-          });
-        })
-        .catch(handleError);
-
-    })
-    .then(() => {
-      console.log(localDevice)
-      // console.log("audioIn",localDevice.audioIn)
-      // console.log("audioOut",localDevice.audioOut)
-      // console.log("videoIn",localDevice.videoIn)
-    })
-    .catch(handleError);
-}
-
-
-
 
 export default {
   name: 'my-virtualbg',
@@ -139,21 +77,16 @@ export default {
       duration: 0,
       position: 'bottom-right'
     });
-    initInnerLocalDevice()
-    this.localDevice = localDevice;
-
-
+    initInnerLocalDevice(this)
   },
   mounted() {
     this.initVb()
   },
   methods: {
-
     async onSubmit() {
-
       let domId = "localdemo01"
       let video = document.getElementById(domId)
-      let stream = video.srcObject
+      let stream = video.srcObject // 获取到该 video 元素当前播放的媒体流对
       if (stream) {
         stream.getAudioTracks().forEach(e => {
           stream.removeTrack(e)
@@ -162,9 +95,8 @@ export default {
           stream.removeTrack(e)
         })
       }
-
       let newStream = await this.getTargetDeviceMedia(this.formInline.videoId, this.formInline.audioInId)
-      video.srcObject = newStream
+      video.srcObject = newStream // 视频和麦克风的流给到视频播放器
       video.muted = true
       this.virtualBg()
 
@@ -177,13 +109,10 @@ export default {
     async getLocalUserMedia(constraints) {
       return await navigator.mediaDevices.getUserMedia(constraints)
     },
+
     /**
-     * 获取指定媒体设备id对应的媒体流
-     * @author suke
-     * @param videoId
-     * @param audioId
-     * @returns {Promise<void>}
-     */
+     * @returns {Promise<MediaStream>}
+     * **/
     async getTargetDeviceMedia(videoId, audioId) {
       const constraints = {
         audio: { deviceId: audioId ? { exact: audioId } : undefined },
@@ -199,9 +128,9 @@ export default {
           track.stop();
         });
       }
-      //被调用方法前面有，此处不再重复
-      return await this.getLocalUserMedia(constraints).catch(handleError);
+      return await this.getLocalUserMedia(constraints).catch(((e)=>console.error(e)));
     },
+
     //初始化模型
     initVb() {
       canvasElement = document.getElementById('output_canvas');
@@ -235,22 +164,22 @@ export default {
       // Done
       canvasCtx.restore();
     },
-    //这个时官网的 我们暂时不用
-    onResults(results) {
-      canvasCtx.save();
-      canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-      canvasCtx.drawImage(results.segmentationMask, 0, 0,
-        canvasElement.width, canvasElement.height);
-      // Only overwrite existing pixels.
-      canvasCtx.globalCompositeOperation = 'source-in';
-      canvasCtx.fillStyle = '#00FF00';
-      canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
-      // Only overwrite missing pixels.
-      canvasCtx.globalCompositeOperation = 'destination-atop';
-      canvasCtx.drawImage(
-        results.image, 0, 0, canvasElement.width, canvasElement.height);
-      canvasCtx.restore();
-    },
+    //这个是官网的 我们暂时不用。
+    // onResults(results) {
+    //   canvasCtx.save();
+    //   canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+    //   canvasCtx.drawImage(results.segmentationMask, 0, 0,
+    //     canvasElement.width, canvasElement.height);
+    //   // Only overwrite existing pixels.
+    //   canvasCtx.globalCompositeOperation = 'source-in';
+    //   canvasCtx.fillStyle = '#00FF00';
+    //   canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+    //   // Only overwrite missing pixels.
+    //   canvasCtx.globalCompositeOperation = 'destination-atop';
+    //   canvasCtx.drawImage(
+    //     results.image, 0, 0, canvasElement.width, canvasElement.height);
+    //   canvasCtx.restore();
+    // },
 
     /**
      * 监听触发模型处理
