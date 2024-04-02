@@ -30,14 +30,18 @@
     <el-row style="width: 100%;">
       <div style="width: 100%;display: flex;flex-direction: row;align-items: center;justify-content: center;">
         <video id="localdemo01" autoplay controls muted></video>
-        <canvas id="output_canvas" class="output_canvas" width="620px" height="400px"></canvas>
+        <canvas id="output_canvas" class="output_canvas" width="680px" height="400px"></canvas>
       </div>
     </el-row>
   </div>
 </template>
 
 <script>
-import * as SFS from "@mediapipe/selfie_segmentation";
+// import * as SFS from "@mediapipe/selfie_segmentation";
+// import {sfs} from '../../../sfs/src/main';
+import {sfs} from '../../../sfs/dist/sfs.js'
+
+
 import {initInnerLocalDevice} from '../hooks/initInnerLocalDevice'
 
 
@@ -137,19 +141,23 @@ export default {
       canvasCtx = canvasElement.getContext('2d');
       image = new Image();
       image.src = this.meimage
-      selfieSegmentation = new SFS.SelfieSegmentation({
-        locateFile: (file) => {
-          console.log(file);
-          return `http://localhost:5500/webRTC/public/v/${file}`;// 你本地的ip+端口
-        }
-      });
-      selfieSegmentation.setOptions({
-        modelSelection: 1,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5,
-      });
-      selfieSegmentation.onResults(this.handleResults);
+      // selfieSegmentation = new SFS.SelfieSegmentation({
+      //   locateFile: (file) => {
+      //     console.log(file);
+      //     return `http://localhost:5500/webRTC/public/dist/${file}`;// 你本地的ip+端口
+      //   }
+      // });
+      // selfieSegmentation.setOptions({
+      //   modelSelection: 1,
+      //   minDetectionConfidence: 0.5,
+      //   minTrackingConfidence: 0.5,
+      // });
+      // selfieSegmentation.onResults(this.handleResults);
+      selfieSegmentation = sfs()
+      selfieSegmentation.onResults(this.handleResults)
     },
+
+
     //我们自定义的 处理背景的
     handleResults(results) {
       // Prepare the new frame
@@ -174,7 +182,7 @@ export default {
     //   canvasCtx.globalCompositeOperation = 'source-in';
     //   canvasCtx.fillStyle = '#00FF00';
     //   canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
-    //   // Only overwrite missing pixels.
+    //   // Only overwrite missing pixels.x
     //   canvasCtx.globalCompositeOperation = 'destination-atop';
     //   canvasCtx.drawImage(
     //     results.image, 0, 0, canvasElement.width, canvasElement.height);

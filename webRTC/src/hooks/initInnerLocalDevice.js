@@ -6,10 +6,9 @@ function handleError(error) {
   console.error('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
 }
 
-var localDevice = null;
 
 export function initInnerLocalDevice(vm) {
-  localDevice = {
+  let localDevice = {
     audioIn: [],
     videoIn: [],
     audioOut: []
