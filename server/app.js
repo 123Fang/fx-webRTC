@@ -25,7 +25,13 @@ app.all('*', (req, res) => {
   // 处理任何请求的逻辑
 });
 
-var server=http.createServer(app)
+
+// 可以在 Express 对象当作回调函数传入 http.createServer，
+// 从而在需要时添加更多底层的 HTTP 控制功能。
+// 这里的目的是使用 socket.io 这个包函数的第一个参数，要传入 http.createServer 创建的对象。
+var server = http.createServer(app)
+
+
 //socket server
 let io = require('socket.io')(server,{allowEIO3:true});
 
